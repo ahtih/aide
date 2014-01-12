@@ -36,5 +36,8 @@ all:: $(PROG)
 $(PROG): $(MOCS) $(OBJS)
 	$(LD) $(LDFLAGS) -o $@ $(OBJS) $(LDADD)
 
+install::
+	install $(PROG) /usr/local/bin
+
 clean::
 	@rm -f *.o *.so *.a *.moc $(PROG)
