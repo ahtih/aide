@@ -8,17 +8,17 @@ CPP_SRCS = Misc.cpp Except.cpp File.cpp cmdline.cpp
 
 PROG = aide
 
-INCPATH  = -I$(SRCINC)/unix -I$(SRCINC) -I$(QTDIR)/include -I$(QTDIR)/mkspecs/default
+INCPATH  = -I$(SRCINC)/unix -I$(SRCINC) -I$(QTDIR)/include -I$(QTDIR)/include/qt4/Qt -I$(QTDIR)/include/qt4 -I$(QTDIR)/mkspecs/default
 
 CFLAGS += -g -O2
 CFLAGS += -Wall -fno-for-scope
-CFLAGS += -D_GNU_SOURCE -D_THREAD_SAFE -enable-threads $(INCPATH)
+CFLAGS += -D_GNU_SOURCE -DNO_MEMCPY_DEFINE -DQT3_SUPPORT -D_THREAD_SAFE -enable-threads $(INCPATH)
 
 CFLAGS += -I/usr/include/freetype2 -D_REENTRANT  -DQT_NO_DEBUG -DQT_THREAD_SUPPORT
-LDADD += -Wl,-rpath,$(QTDIR)/lib -L$(QTDIR)/lib -L/usr/X11R6/lib -lqt-mt -lpthread -lXext -lX11 -lm
+LDADD += -lQtCore -lQtGui -lQt3Support -lpthread -lXext -lX11 -lm
 
 CPP=g++
-LD=gcc
+LD=g++
 MOC=$(QTDIR)/bin/moc
 
 .SUFFIXES: .moc .o

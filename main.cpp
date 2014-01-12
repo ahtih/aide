@@ -8,16 +8,17 @@
 #define QT_NO_STL
 #include <qapplication.h>
 #include <qclipboard.h>
-#include <qfiledialog.h>
+#include <qdesktopwidget.h>
+#include <q3filedialog.h>
 #include <qmessagebox.h>
-#include <qlistbox.h>
-#include <qaccel.h>
-#include <qpopupmenu.h>
+#include <q3listbox.h>
+#include <q3accel.h>
+#include <q3popupmenu.h>
 #include <qmenubar.h>
-#include <qmainwindow.h>
-#include <qprocess.h>
+#include <q3mainwindow.h>
+#include <q3process.h>
 #include <qsettings.h>
-#include <qscrollview.h>
+#include <q3scrollview.h>
 #include <qscrollbar.h>
 #include <qcolor.h>
 #include <qpainter.h>
@@ -35,7 +36,7 @@
 
 class main_window_t;
 
-class process_t: public QProcess {
+class process_t: public Q3Process {
 	Q_OBJECT
 
 	STR pending_output;
@@ -99,7 +100,7 @@ class process_t: public QProcess {
 
 	uint run(void)
 		{
-			if (launch(""))
+			if (launch(QString("")))
 				return 1;
 
 			printf("Failed to start sh\n");
@@ -165,10 +166,10 @@ class aide_application_t : public QApplication {
 			}
 	};
 
-class compile_window_t : public QListBox {
+class compile_window_t : public Q3ListBox {
 	Q_OBJECT
 
-	class output_line_t : public QListBoxText {
+	class output_line_t : public Q3ListBoxText {
 		QColor color;
 
 		protected:
@@ -176,11 +177,11 @@ class compile_window_t : public QListBox {
 		void paint(QPainter *painter)
 			{
 				if (isCurrent())
-					QListBoxText::paint(painter);
+					Q3ListBoxText::paint(painter);
 				  else {
 					const QPen &prev_pen=painter->pen();
 					painter->setPen(color);
-					QListBoxText::paint(painter);
+					Q3ListBoxText::paint(painter);
 					painter->setPen(prev_pen);
 					}
 				}
@@ -188,7 +189,7 @@ class compile_window_t : public QListBox {
 		public:
 
 		output_line_t(const QString &str,const QColor &_color) :
-								QListBoxText(str), color(_color) {}
+								Q3ListBoxText(str), color(_color) {}
 		};
 
 	main_window_t * const main_window;
@@ -272,12 +273,12 @@ class compile_window_t : public QListBox {
 				case CONTINUATION_LINE:	break;
 				}
 
-			QListBoxItem * const new_item=new output_line_t(line,
+			Q3ListBoxItem * const new_item=new output_line_t(line,
 							last_line_was_errorwarning ? Qt::red : Qt::black);
 			insertItem(new_item);
 
 			if (is_scrolling_to_end) {
-				const QListBoxItem * const cur_item=item(currentItem());
+				const Q3ListBoxItem * const cur_item=item(currentItem());
 				if (cur_item == NULL)
 					setCurrentItem(new_item);
 				  else
@@ -367,12 +368,12 @@ class compile_window_t : public QListBox {
 	compile_window_t(main_window_t * const _main_window);
 	};
 
-class main_window_t : public QMainWindow {
+class main_window_t : public Q3MainWindow {
 	Q_OBJECT
 
 	compile_window_t compile_window;
-	QListBox sources_list;
-	QPopupMenu file_menu;
+	Q3ListBox sources_list;
+	Q3PopupMenu file_menu;
 	process_t *getsources_process;	// NULL if no getsources process running
 
 	void set_recent_makefiles_in_file_menu(void);
@@ -414,7 +415,7 @@ class main_window_t : public QMainWindow {
 
 	void open_file_dialog(void)
 		{
-			const QString fname=QFileDialog::getOpenFileName(
+			const QString fname=Q3FileDialog::getOpenFileName(
 					QString::null,"makefiles (Makefile* *.mk)",
 					this,"open makefile dialog","Open makefile");
 			if (fname.isNull())
@@ -444,7 +445,7 @@ class main_window_t : public QMainWindow {
 	void add_source_file(const char * const fname)
 		{
 			if (sources_list.findItem(fname,
-							Qt::CaseSensitive|Qt::ExactMatch) == NULL) {
+					Q3ListBox::CaseSensitive|Q3ListBox::ExactMatch) == NULL) {
 				sources_list.insertItem(fname);
 				sources_list.sort();
 				last_compiled_source_fname=fname;
@@ -491,7 +492,7 @@ class main_window_t : public QMainWindow {
 				const filename fname(separator + 1);
 				const char * const basename=fname.BaseName();
 
-				for (const QListBoxItem *qlbi=sources_list.firstItem();
+				for (const Q3ListBoxItem *qlbi=sources_list.firstItem();
 									qlbi != NULL;qlbi=qlbi->next()) {
 					QString txt=qlbi->text();
 					if (txt.isNull())
@@ -537,7 +538,7 @@ class main_window_t : public QMainWindow {
 /***************************************************************************/
 
 compile_window_t::compile_window_t(main_window_t * const _main_window) :
-					QListBox(NULL,"compile_window"),
+					Q3ListBox(NULL,"compile_window"),
 					main_window(_main_window), make_process(NULL)
 {
 	setFrameStyle(NoFrame);
@@ -547,22 +548,22 @@ compile_window_t::compile_window_t(main_window_t * const _main_window) :
 
 	connect(this,SIGNAL(selected(int)),SLOT(start_editing_error(int)));
 
-	QAccel * const accel=new QAccel(this);
-	accel->connectItem(accel->insertItem(CTRL + Key_C),
+	Q3Accel * const accel=new Q3Accel(this);
+	accel->connectItem(accel->insertItem(Qt::CTRL + Qt::Key_C),
 										this,SLOT(copy_line(void)));
-	accel->connectItem(accel->insertItem(CTRL + SHIFT + Key_C),
+	accel->connectItem(accel->insertItem(Qt::CTRL + Qt::SHIFT + Qt::Key_C),
 										this,SLOT(copy_all_errors(void)));
 	}
 
 void compile_window_t::moveEvent(QMoveEvent *e)
 {
-	QListBox::moveEvent(e);
+	Q3ListBox::moveEvent(e);
 	main_window->save_window_pos(this);
 	}
 
 void compile_window_t::resizeEvent(QResizeEvent *e)
 {
-	QListBox::resizeEvent(e);
+	Q3ListBox::resizeEvent(e);
 	main_window->save_window_size(this);
 	}
 
@@ -637,7 +638,7 @@ process_t::process_t(main_window_t * const main_window,
 					const uint want_output,
 					const char * const fname,
 					const uint line_nr) :
-						QProcess(main_window,command_name)
+						Q3Process(main_window,command_name)
 {
 	setCommunication(want_output ? (Stdout|Stderr|DupStderr) : 0);
 
@@ -697,12 +698,12 @@ process_t::process_t(main_window_t * const main_window,
 /***************************************************************************/
 
 main_window_t::main_window_t(const aide_application_t * const _app) :
-					QMainWindow(NULL,"main_window"),
+					Q3MainWindow(NULL,"main_window"),
 					compile_window(this), sources_list(this),
 					file_menu(this), getsources_process(NULL),
 					last_compiled_source_fname(NULL), app(_app)
 {
-	sources_list.setFrameStyle(QFrame::NoFrame);
+	sources_list.setFrameStyle(Q3Frame::NoFrame);
 	setCentralWidget(&sources_list);
 
 	connect(&sources_list,SIGNAL(selected(const QString &)),
@@ -711,11 +712,11 @@ main_window_t::main_window_t(const aide_application_t * const _app) :
 	menuBar()->insertItem("&File",&file_menu);
 
 	file_menu.insertItem("&Open makefile..",
-					this,SLOT(open_file_dialog()),CTRL + Key_O);
+					this,SLOT(open_file_dialog()),Qt::CTRL + Qt::Key_O);
 	file_menu.insertItem("&Edit makefile",
-					this,SLOT(start_editing_makefile()),CTRL + Key_E);
+					this,SLOT(start_editing_makefile()),Qt::CTRL + Qt::Key_E);
 	file_menu.insertItem("E&xit",
-					app,SLOT(quit()),CTRL + Key_Q);
+					app,SLOT(quit()),Qt::CTRL + Qt::Key_Q);
 	file_menu.insertSeparator();
 
 	set_recent_makefiles_in_file_menu();
@@ -723,15 +724,15 @@ main_window_t::main_window_t(const aide_application_t * const _app) :
 									SLOT(load_recent_makefile(int)));
 
 
-	{QPopupMenu * const menu=new QPopupMenu(this);
+	{Q3PopupMenu * const menu=new Q3PopupMenu(this);
 	menuBar()->insertItem("&Build",menu);
 
 	menu->insertItem("&Compile current source",
-					this,SLOT(start_compiling_current_file()),Key_F3);
+					this,SLOT(start_compiling_current_file()),Qt::Key_F3);
 	menu->insertItem("&Make all",
-					&compile_window,SLOT(start_making_all()),Key_F4);
+					&compile_window,SLOT(start_making_all()),Qt::Key_F4);
 	menu->insertItem("Make clean &&&& &all",
-					&compile_window,SLOT(start_making_clean_all()),Key_F5);
+					&compile_window,SLOT(start_making_clean_all()),Qt::Key_F5);
 	menu->insertItem("Make &clean",
 					&compile_window,SLOT(start_making_clean()));}
 	}
@@ -758,13 +759,13 @@ void main_window_t::set_recent_makefiles_in_file_menu(void)
 
 void main_window_t::moveEvent(QMoveEvent *e)
 {
-	QMainWindow::moveEvent(e);
+	Q3MainWindow::moveEvent(e);
 	save_window_pos(this);
 	}
 
 void main_window_t::resizeEvent(QResizeEvent *e)
 {
-	QMainWindow::resizeEvent(e);
+	Q3MainWindow::resizeEvent(e);
 	save_window_size(this);
 	}
 
