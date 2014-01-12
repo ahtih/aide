@@ -1176,6 +1176,8 @@ void aide_application_t::set_main_window(main_window_t * const mw)
 
 int main(sint argc,char **argv)
 {
+	QApplication::setOrganizationName("aide");
+	QApplication::setApplicationName("aide");
 	aide_application_t a(argc,argv);
 
 	cmdline::init(argc,argv);
